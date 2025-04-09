@@ -2,11 +2,11 @@ import requests
 import sqlite3
 import os
 
-# Set up paths
+#Paths and URLS
 dir_path = os.path.dirname(os.path.realpath(__file__))
 db_path = os.path.join(dir_path, 'recipes.db')
 base_url = 'https://api.spoonacular.com/recipes'
-API_KEY = 'd64af55f4de54f218e403c7b1b41f7cb'
+API_KEY = 'e002c80b532244538a3ce9405e6db808'
 
 
 def get_cookie_recipes(number, offset=0):
@@ -46,6 +46,7 @@ def connecting_with_recipes_database(cur, conn, target):
 
         conn.commit()
 
+    #SQL COMMANDS NEEDED
     cur.execute("DELETE FROM Recipes WHERE title NOT LIKE ?", ('%cookie%',))
     conn.commit()
 
@@ -64,6 +65,10 @@ def connecting_with_ingreidents_table(cur, conn):
     print(recipe_keys)
 
     for index in recipe_keys:
+        cur.execute("SELECT id FROM Recipes WHERE id = ?", (index))
+        exists = cur.fetchone()[0]
+        if exists:
+            continue
         url = f"{base_url}/{index}/information?includeNutrition=false&apiKey={API_KEY}"
         response = requests.get(url)
 
@@ -94,12 +99,13 @@ def connecting_with_ingreidents_table(cur, conn):
         
         cur.execute('''
         INSERT OR REPLACE INTO Ingredients (
-            id, title, servings, readyInMinutes, ingredients)
+            id, servings, readyInMinutes, ingredients)
             VALUES (?, ?, ?, ?) ''',
             (recipe_id, servings, ready_in, ingredients_str))
         
     
     conn.commit()
+
 
 def main():
     conn = sqlite3.connect(db_path)
