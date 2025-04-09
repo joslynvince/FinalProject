@@ -5,10 +5,9 @@ import os
 # Set up paths
 dir_path = os.path.dirname(os.path.realpath(__file__))
 db_path = os.path.join(dir_path, 'recipes.db')
-
-# Spoonacular settings
 base_url = 'https://api.spoonacular.com/recipes'
 API_KEY = 'd64af55f4de54f218e403c7b1b41f7cb'
+
 
 def get_cookie_recipes(number, offset=0):
     url = f"{base_url}/complexSearch?query=cookie&number={number}&offset={offset}&apiKey={API_KEY}"
@@ -21,31 +20,95 @@ def get_cookie_recipes(number, offset=0):
         print(f"Failed to retrieve data: {response.status_code}")
         return []
 
-# Connect to the database
-conn = sqlite3.connect(db_path)
-cur = conn.cursor()
+def connecting_with_recipes_database(cur, conn, target):
+    cur.execute("SELECT COUNT(*) FROM Recipes")
+    result = cur.fetchone()[0]
 
-# Recreate the table (drop old one if it exists)
-cur.execute('DROP TABLE IF EXISTS Recipes')
-cur.execute('''
-    CREATE TABLE Recipes (
+    if result >= target:
+        return
+    
+    cur.execute('''
+    CREATE TABLE IF NOT EXISTS Recipes (
         id INTEGER PRIMARY KEY,
         title TEXT,
         image TEXT)
-''')
+    ''')
 
-# Fetch and insert recipes in batches
-for offset in range(0, 500, 100):  # Change 500 to a higher number if needed
-    recipes = get_cookie_recipes(100, offset=offset)
+    # Fetch and insert recipes in batches
+    for offset in range(0, 700, 100):
+        recipes = get_cookie_recipes(100, offset=offset)
     
-    for item in recipes:
-        cur.execute('''
-            INSERT OR REPLACE INTO Recipes (id, title, image)
-            VALUES (?, ?, ?)
-        ''', (item.get('id'), item.get('title'), item.get('image')))
+        for item in recipes:
+            cur.execute('''
+                INSERT OR REPLACE INTO Recipes (id, title, image)
+                VALUES (?, ?, ?)
+            ''', (item.get('id'), item.get('title'), item.get('image')))
 
+        conn.commit()
+
+    cur.execute("DELETE FROM Recipes WHERE title NOT LIKE ?", ('%cookie%',))
     conn.commit()
 
-# Close the connection
-conn.close()
-print("Done! Recipes inserted into the database.")
+    print("Done! Recipes inserted into the database.")
+
+def connecting_with_ingreidents_table(cur, conn):
+    recipe_keys = []
+    cur.execute("SELECT id FROM Recipes")
+    all_keys = cur.fetchall()
+
+    for key in all_keys:
+        recipe_key = key[0]
+        print(recipe_key)
+        recipe_keys.append(recipe_key)
+
+    print(recipe_keys)
+
+    for index in recipe_keys:
+        url = f"{base_url}/{index}/information?includeNutrition=false&apiKey={API_KEY}"
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            result = response.json()
+            print("Working")
+        else:
+            break
+
+        recipe_id = result.get("id")
+        servings = result.get("servings")
+        ready_in = result.get("readyInMinutes")
+
+        ingredient_names = []
+        for item in result.get("extendedIngredients", []):
+            name = item.get("name")
+            ingredient_names.append(name)
+
+        ingredients_str = ", ".join(ingredient_names)
+
+        cur.execute('''
+        CREATE TABLE IF NOT EXISTS Ingredients (
+            id INTEGER PRIMARY KEY,
+            servings INTEGER,
+            readyInMinutes INTEGER,
+            ingredients TEXT)
+            ''')
+        
+        cur.execute('''
+        INSERT OR REPLACE INTO Ingredients (
+            id, title, servings, readyInMinutes, ingredients)
+            VALUES (?, ?, ?, ?) ''',
+            (recipe_id, servings, ready_in, ingredients_str))
+        
+    
+    conn.commit()
+
+def main():
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+
+    connecting_with_recipes_database(cur, conn, 166)
+    connecting_with_ingreidents_table(cur, conn)
+
+    conn.commit()
+    conn.close()
+
+main()
