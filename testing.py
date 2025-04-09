@@ -49,29 +49,34 @@ def connecting_with_recipes_database(cur, conn, target):
     cur.execute("DELETE FROM Recipes WHERE title NOT LIKE ?", ('%cookie%',))
     conn.commit()
 
-    print("Done! Recipes inserted into the database.")
-
-def connecting_with_ingreidents_table(cur, conn):
+def connecting_with_ingredients_table(cur, conn):
     recipe_keys = []
     cur.execute("SELECT id FROM Recipes")
     all_keys = cur.fetchall()
-
     for key in all_keys:
-        recipe_key = key[0]
-        print(recipe_key)
-        recipe_keys.append(recipe_key)
+        recipe_keys.append(key[0])
 
-    print(recipe_keys)
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS Ingredients (
+            id INTEGER PRIMARY KEY,
+            servings INTEGER,
+            readyInMinutes INTEGER,
+            ingredients TEXT
+        )
+    ''')
 
     for index in recipe_keys:
+        cur.execute("SELECT id FROM Ingredients WHERE id = ?", (index,))
+        if cur.fetchone():
+            continue
+
         url = f"{base_url}/{index}/information?includeNutrition=false&apiKey={API_KEY}"
         response = requests.get(url)
 
-        if response.status_code == 200:
-            result = response.json()
-            print("Working")
-        else:
-            break
+        if response.status_code != 200:
+            continue
+
+        result = response.json()
 
         recipe_id = result.get("id")
         servings = result.get("servings")
@@ -85,20 +90,31 @@ def connecting_with_ingreidents_table(cur, conn):
         ingredients_str = ", ".join(ingredient_names)
 
         cur.execute('''
-        CREATE TABLE IF NOT EXISTS Ingredients (
-            id INTEGER PRIMARY KEY,
-            servings INTEGER,
-            readyInMinutes INTEGER,
-            ingredients TEXT)
-            ''')
-        
-        cur.execute('''
-        INSERT OR REPLACE INTO Ingredients (
-            id, title, servings, readyInMinutes, ingredients)
-            VALUES (?, ?, ?, ?) ''',
-            (recipe_id, servings, ready_in, ingredients_str))
-        
-    
+            INSERT OR REPLACE INTO Ingredients (
+                id, servings, readyInMinutes, ingredients
+            )
+            VALUES (?, ?, ?, ?)
+        ''', (recipe_id, servings, ready_in, ingredients_str))
+
+    conn.commit()
+
+def connecting_with_integer_key_table(cur, conn):
+    cur.execute('''
+    CREATE TABLE IF NOT EXISTS IngredientNames (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE)
+       ''')
+
+    cur.execute("SELECT id, ingredients FROM Ingredients")
+    rows = cur.fetchall()
+
+    for recipe_id, ingredients_str in rows:
+        ingredients = [i.strip() for i in ingredients_str.split(",")]
+        for ing in ingredients:
+            cur.execute('''
+                INSERT OR IGNORE INTO IngredientNames (name) VALUES (?)
+                ''', (ing,))
+
     conn.commit()
 
 def main():
@@ -106,7 +122,8 @@ def main():
     cur = conn.cursor()
 
     connecting_with_recipes_database(cur, conn, 166)
-    connecting_with_ingreidents_table(cur, conn)
+    connecting_with_ingredients_table(cur, conn)
+    connecting_with_integer_key_table(cur, conn)
 
     conn.commit()
     conn.close()
