@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #vis.vega-embed {
+      width: 100%;
+      display: flex;
+    }
+
+    #vis.vega-embed details,
+    #vis.vega-embed details summary {
+      position: relative;
+    }
+  </style>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5.8.0"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+  <div id="vis"></div>
+  <script>
+    (function(vegaEmbed) {
+      var spec = {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}}, "data": {"name": "data-45866e880e3da0da87bdf7fb32d4f23e"}, "mark": {"type": "bar", "color": "green"}, "encoding": {"tooltip": [{"field": "readyInMinutes", "type": "quantitative"}, {"field": "count", "type": "quantitative"}], "x": {"field": "readyInMinutes", "title": "Ready In Minutes", "type": "ordinal"}, "y": {"field": "count", "title": "Number of Recipes", "type": "quantitative"}}, "height": 400, "title": "Number of Recipes by Prep Time", "width": 600, "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json", "datasets": {"data-45866e880e3da0da87bdf7fb32d4f23e": [{"readyInMinutes": 10, "count": 1}, {"readyInMinutes": 15, "count": 1}, {"readyInMinutes": 20, "count": 3}, {"readyInMinutes": 21, "count": 1}, {"readyInMinutes": 22, "count": 2}, {"readyInMinutes": 24, "count": 1}, {"readyInMinutes": 25, "count": 3}, {"readyInMinutes": 30, "count": 11}, {"readyInMinutes": 35, "count": 3}, {"readyInMinutes": 45, "count": 130}, {"readyInMinutes": 47, "count": 1}, {"readyInMinutes": 75, "count": 3}, {"readyInMinutes": 77, "count": 1}, {"readyInMinutes": 90, "count": 1}, {"readyInMinutes": 120, "count": 1}, {"readyInMinutes": 140, "count": 1}, {"readyInMinutes": 165, "count": 1}, {"readyInMinutes": 270, "count": 1}]}};
+      var embedOpt = {"mode": "vega-lite"};
+
+      function showError(el, error){
+          el.innerHTML = ('<div style="color:red;">'
+                          + '<p>JavaScript Error: ' + error.message + '</p>'
+                          + "<p>This usually means there's a typo in your chart specification. "
+                          + "See the javascript console for the full traceback.</p>"
+                          + '</div>');
+          throw error;
+      }
+      const el = document.getElementById('vis');
+      vegaEmbed("#vis", spec, embedOpt)
+        .catch(error => showError(el, error));
+    })(vegaEmbed);
+
+  </script>
+</body>
+</html>
