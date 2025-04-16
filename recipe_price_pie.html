@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #vis.vega-embed {
+      width: 100%;
+      display: flex;
+    }
+
+    #vis.vega-embed details,
+    #vis.vega-embed details summary {
+      position: relative;
+    }
+  </style>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5.8.0"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+  <div id="vis"></div>
+  <script>
+    (function(vegaEmbed) {
+      var spec = {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}}, "data": {"name": "data-fb4983e59ac644bb6b22647652976eeb"}, "mark": {"type": "arc"}, "encoding": {"color": {"field": "range", "type": "nominal"}, "theta": {"field": "count", "type": "quantitative"}, "tooltip": [{"field": "range", "type": "nominal"}, {"field": "count", "type": "quantitative"}]}, "title": "Recipe Count by Price Range", "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json", "datasets": {"data-fb4983e59ac644bb6b22647652976eeb": [{"range": "10-20", "count": 4}, {"range": "20-30", "count": 34}, {"range": "30-40", "count": 49}, {"range": "40-50", "count": 36}, {"range": "50-60", "count": 23}, {"range": "60-70", "count": 14}, {"range": "70-80", "count": 4}, {"range": "80-90", "count": 0}, {"range": "90-100", "count": 2}]}};
+      var embedOpt = {"mode": "vega-lite"};
+
+      function showError(el, error){
+          el.innerHTML = ('<div style="color:red;">'
+                          + '<p>JavaScript Error: ' + error.message + '</p>'
+                          + "<p>This usually means there's a typo in your chart specification. "
+                          + "See the javascript console for the full traceback.</p>"
+                          + '</div>');
+          throw error;
+      }
+      const el = document.getElementById('vis');
+      vegaEmbed("#vis", spec, embedOpt)
+        .catch(error => showError(el, error));
+    })(vegaEmbed);
+
+  </script>
+</body>
+</html>
