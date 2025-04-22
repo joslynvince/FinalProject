@@ -31,9 +31,8 @@ def plot_pie(df):
         title='Recipe Count by Price Range'
     )
 
-    output_path = os.path.join(dir_path, "recipe_price_pie.html")
+    output_path = os.path.join(dir_path, "vis1.html")
     chart.save(output_path)
-    print(f"✅ Chart saved as {output_path}")
 
 def main():
     prices = fetch_prices()

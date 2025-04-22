@@ -1,0 +1,16 @@
+Getting Information about Recipe Average, Max Price, and Min Price
+-------------------------------------------------------------------
+Avergage price of recipes in database: $41.65283132530121
+The name of the recipe with the **highest cost** is  - MINI OATMEAL COOKIE CHEESECAKES, 
+         with a price of: $91.96
+The name of the recipe with the **lowest cost** is  - Reeses Peanut Butter Chocolate Chip Cookies, 
+         with a price of: $16.37
+
+Getting Information about Price Per Serving Average, Max Price, and Min Price
+--------------------------------------------------------------------------------
+Avergage price per servings of recipes in database: $2.770240963855422
+The name of the recipe with the **highest cost** is  - 90 Second Cookie in a Bowl, 
+        with a price per serving cost of: $26.82
+The name of the recipe with the **lowest cost** is  - Eggless Chocolate Chip Crescent Cookies - Eggless Cookies, 
+         with a price per serving cost of: $0.36
+

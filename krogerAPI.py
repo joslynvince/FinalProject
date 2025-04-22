@@ -7,6 +7,7 @@ import time
 dir_path = os.path.dirname(os.path.realpath(__file__))
 db_path = os.path.join(dir_path, "recipes.db")
 
+BASE_URL = "https://api.kroger.com/v1/products"
 client_id = "joslynvince-24326124303424765878784d364161685961794144666e646839577a654f626d6c793749664c7352424d7068336a774f534c43346d45594b643648471477074199703906271"
 client_secret = "IOovHChygNiZ_SS2GTizZPuklyY6DXUBm7ixfBU8"
 LOCATION_ID = "01400439"
@@ -37,7 +38,7 @@ def get_price_for_ingredient(token, query):
         "filter.locationId": LOCATION_ID,
         "filter.limit": 1
     }
-    response = requests.get("https://api.kroger.com/v1/products", headers=headers, params=params)
+    response = requests.get(BASE_URL, headers=headers, params=params)
     if response.status_code == 200:
         data = response.json().get("data", [])
         if data:

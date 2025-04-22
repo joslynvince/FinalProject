@@ -12,42 +12,38 @@ API_KEY = 'd879a1ceee77438aa8edbd985cfc0aea'
 def get_cookie_recipes(number, offset=0):
     url = f"{base_url}/complexSearch?query=cookie&number={number}&offset={offset}&apiKey={API_KEY}"
     response = requests.get(url)
-    #print(f"Fetching offset {offset}:", response)
     
     if response.status_code == 200:
         return response.json().get("results", [])
     else:
-        #print(f"Failed to retrieve data: {response.status_code}")
         return []
 
-def connecting_with_recipes_database(cur, conn, target):
+
+def connecting_with_recipes_database(cur, conn, target, offset):
+
     cur.execute('''
     CREATE TABLE IF NOT EXISTS Recipes (
         id INTEGER PRIMARY KEY,
         title TEXT,
         image TEXT)
     ''')
-     
+
     cur.execute("SELECT COUNT(*) FROM Recipes")
     result = cur.fetchone()[0]
 
     if result >= target:
         return
     
-
-    # Fetch and insert recipes in batches
-    for offset in range(0, 700, 100):
-        recipes = get_cookie_recipes(25, offset=offset)
+    recipes = get_cookie_recipes(25, offset=offset)
     
-        for item in recipes:
-            cur.execute('''
-                INSERT OR REPLACE INTO Recipes (id, title, image)
-                VALUES (?, ?, ?)
+    for item in recipes:
+        cur.execute('''
+            INSERT OR REPLACE INTO Recipes (id, title, image)
+            VALUES (?, ?, ?)
             ''', (item.get('id'), item.get('title'), item.get('image')))
 
         conn.commit()
 
-    #SQL COMMANDS NEEDED
     cur.execute("DELETE FROM Recipes WHERE title NOT LIKE ?", ('%cookie%',))
     conn.commit()
 

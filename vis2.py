@@ -28,7 +28,7 @@ def plot_ready_minutes(df):
         height=400
     )
 
-    output_path = os.path.join(dir_path, "ready_minutes_bar.html")
+    output_path = os.path.join(dir_path, "vis2.html")
     chart.save(output_path)
 
 def main():
